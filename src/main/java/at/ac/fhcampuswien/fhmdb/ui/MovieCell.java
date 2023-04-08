@@ -1,6 +1,7 @@
 package at.ac.fhcampuswien.fhmdb.ui;
 
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.MovieAPI;
 import javafx.geometry.Insets;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -10,14 +11,14 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import java.util.stream.Collectors;
 
-public class MovieCell extends ListCell<Movie> {
+public class MovieCell extends ListCell<MovieAPI> {
     private final Label title = new Label();
     private final Label detail = new Label();
     private final Label genre = new Label();
     private final VBox layout = new VBox(title, detail, genre);
 
     @Override
-    protected void updateItem(Movie movie, boolean empty) {
+    protected void updateItem(MovieAPI movie, boolean empty) {
         super.updateItem(movie, empty);
 
         if (empty || movie == null) {

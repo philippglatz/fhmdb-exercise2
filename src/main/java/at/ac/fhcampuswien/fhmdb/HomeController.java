@@ -2,6 +2,7 @@ package at.ac.fhcampuswien.fhmdb;
 
 import at.ac.fhcampuswien.fhmdb.models.Genre;
 import at.ac.fhcampuswien.fhmdb.models.Movie;
+import at.ac.fhcampuswien.fhmdb.models.MovieAPI;
 import at.ac.fhcampuswien.fhmdb.models.SortedState;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
 import com.jfoenix.controls.JFXButton;
@@ -15,10 +16,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
 import java.net.URL;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 public class HomeController implements Initializable {
     @FXML
@@ -36,9 +34,9 @@ public class HomeController implements Initializable {
     @FXML
     public JFXButton sortBtn;
 
-    public List<Movie> allMovies;
+    public List<MovieAPI> allMovies;
 
-    protected ObservableList<Movie> observableMovies = FXCollections.observableArrayList();
+    protected ObservableList<MovieAPI> observableMovies = FXCollections.observableArrayList();
 
     protected SortedState sortedState;
 
@@ -49,7 +47,7 @@ public class HomeController implements Initializable {
     }
 
     public void initializeState() {
-        allMovies = Movie.initializeMovies();
+        allMovies = MovieAPI.initializeMovies();
         observableMovies.clear();
         observableMovies.addAll(allMovies); // add all movies to the observable list
         sortedState = SortedState.NONE;
@@ -70,15 +68,15 @@ public class HomeController implements Initializable {
     // afterwards it switches between ascending and descending
     public void sortMovies() {
         if (sortedState == SortedState.NONE || sortedState == SortedState.DESCENDING) {
-            observableMovies.sort(Comparator.comparing(Movie::getTitle));
+            observableMovies.sort(Comparator.comparing(MovieAPI::getTitle));
             sortedState = SortedState.ASCENDING;
         } else if (sortedState == SortedState.ASCENDING) {
-            observableMovies.sort(Comparator.comparing(Movie::getTitle).reversed());
+            observableMovies.sort(Comparator.comparing(MovieAPI::getTitle).reversed());
             sortedState = SortedState.DESCENDING;
         }
     }
 
-    public List<Movie> filterByQuery(List<Movie> movies, String query){
+    public List<MovieAPI> filterByQuery(List<MovieAPI> movies, String query){
         if(query == null || query.isEmpty()) return movies;
 
         if(movies == null) {
@@ -94,7 +92,7 @@ public class HomeController implements Initializable {
                 .toList();
     }
 
-    public List<Movie> filterByGenre(List<Movie> movies, Genre genre){
+    public List<MovieAPI> filterByGenre(List<MovieAPI> movies, Genre genre){
         if(genre == null) return movies;
 
         if(movies == null) {
@@ -108,7 +106,7 @@ public class HomeController implements Initializable {
     }
 
     public void applyAllFilters(String searchQuery, Object genre) {
-        List<Movie> filteredMovies = allMovies;
+        List<MovieAPI> filteredMovies = allMovies;
 
         if (!searchQuery.isEmpty()) {
             filteredMovies = filterByQuery(filteredMovies, searchQuery);
