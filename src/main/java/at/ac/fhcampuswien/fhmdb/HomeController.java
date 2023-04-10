@@ -55,7 +55,6 @@ public class HomeController implements Initializable {
         initializeState();
         initializeLayout();
 
-
     }
 
     public void initializeState() {
