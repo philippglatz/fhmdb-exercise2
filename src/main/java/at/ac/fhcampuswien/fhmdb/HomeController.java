@@ -32,6 +32,12 @@ public class HomeController implements Initializable {
     public JFXComboBox genreComboBox;
 
     @FXML
+    public JFXComboBox yearComboBox;
+
+    @FXML
+    public JFXComboBox ratingComboBox;
+
+    @FXML
     public JFXButton sortBtn;
 
     public List<MovieAPI> allMovies;
@@ -40,10 +46,16 @@ public class HomeController implements Initializable {
 
     protected SortedState sortedState;
 
+    private String selectedGenre = "Filter by Genre";
+    private String selectedReleaseYear = "Filter by Release Year";
+    private String selectedRating = "Filter by Rating";
+
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         initializeState();
         initializeLayout();
+
+
     }
 
     public void initializeState() {
@@ -61,7 +73,46 @@ public class HomeController implements Initializable {
         genreComboBox.getItems().add("No filter");  // add "no filter" to the combobox
         genreComboBox.getItems().addAll(genres);    // add all genres to the combobox
         genreComboBox.setPromptText("Filter by Genre");
+
+        yearComboBox.getItems().add("Filter by Release Year");
+        yearComboBox.getItems().addAll(releaseYearList());
+        yearComboBox.getSelectionModel().select(0);
+
+        ratingComboBox.getItems().add("Filter by Rating");
+        ratingComboBox.getItems().addAll(getRatings());
+        ratingComboBox.getSelectionModel().select(0);
+
     }
+
+    public HomeController(){
+        this.initializeState();
+    }
+
+
+    public ObservableList<String> releaseYearList(){
+        ObservableList<String> releaseYears = FXCollections.observableArrayList();
+        for (MovieAPI movie : allMovies){
+            int year = movie.getReleaseYear();
+            if (!releaseYears.contains(year)){
+                releaseYears.add(String.valueOf(year));
+            }
+        }
+        Collections.sort(releaseYears);
+        return releaseYears;
+    }
+
+    public ObservableList<String> getRatings(){
+        ObservableList<String> ratingList = FXCollections.observableArrayList();
+        for (MovieAPI movie : allMovies){
+            String rating = String.valueOf(movie.getRating());
+            if(!ratingList.contains(rating)){
+                ratingList.add(rating);
+            }
+        }
+        Collections.sort(ratingList);
+        return ratingList;
+    }
+
 
     // sort movies based on sortedState
     // by default sorted state is NONE
@@ -134,4 +185,5 @@ public class HomeController implements Initializable {
     public void sortBtnClicked(ActionEvent actionEvent) {
         sortMovies();
     }
+
 }
