@@ -150,7 +150,7 @@ public class MovieAPI {
 
         public static List<MovieAPI> initializeMovies() {
                 Gson gson = new Gson();
-                List<MovieAPI> movieAPIS = null;
+                List<MovieAPI> movies = null;
                 try {
                         URL url = new URL("https://prog2.fh-campuswien.ac.at/movies");
 
@@ -174,13 +174,12 @@ public class MovieAPI {
                                 scanner.close();
                                 System.out.println(informationString);
 
-                                Type movieType = new TypeToken<ArrayList<MovieAPI>>() {
-                                }.getType();
-                                movieAPIS = gson.fromJson(String.valueOf(informationString), movieType);
+                                Type movieType = new TypeToken<ArrayList<MovieAPI>>() {}.getType();
+                                movies = gson.fromJson(String.valueOf(informationString), movieType);
                         }
                 } catch (Exception e) {
                         e.printStackTrace();
                 }
-                return movieAPIS;
+                return movies;
         }
 }

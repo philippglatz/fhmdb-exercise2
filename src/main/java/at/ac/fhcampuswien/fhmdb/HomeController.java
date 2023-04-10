@@ -5,6 +5,8 @@ import at.ac.fhcampuswien.fhmdb.models.Movie;
 import at.ac.fhcampuswien.fhmdb.models.MovieAPI;
 import at.ac.fhcampuswien.fhmdb.models.SortedState;
 import at.ac.fhcampuswien.fhmdb.ui.MovieCell;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXListView;
@@ -15,6 +17,10 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 
+import java.io.IOException;
+import java.lang.reflect.Type;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
@@ -49,6 +55,8 @@ public class HomeController implements Initializable {
     private String selectedGenre = "Filter by Genre";
     private String selectedReleaseYear = "Filter by Release Year";
     private String selectedRating = "Filter by Rating";
+
+    private String baseURL = ("https://prog2.fh-campuswien.ac.at/movies");
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
@@ -126,36 +134,86 @@ public class HomeController implements Initializable {
         }
     }
 
-    public List<MovieAPI> filterByQuery(List<MovieAPI> movies, String query){
+    public List<MovieAPI> filterByQuery(List<MovieAPI> movies, String query) throws IOException{
+        Gson gson = new Gson();
         if(query == null || query.isEmpty()) return movies;
 
         if(movies == null) {
             throw new IllegalArgumentException("movies must not be null");
         }
 
-        return movies.stream()
-                .filter(Objects::nonNull)
-                .filter(movie ->
-                    movie.getTitle().toLowerCase().contains(query.toLowerCase()) ||
-                    movie.getDescription().toLowerCase().contains(query.toLowerCase())
-                )
-                .toList();
+        try {
+            URL url = new URL(baseURL + "?query=" + query);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.connect();
+
+            //check if connected
+            int responseCode = connection.getResponseCode();
+
+            // 200 = OK
+            if (responseCode != 200) {
+                throw new RuntimeException("HttpResponseCode: " + responseCode);
+            } else {
+                StringBuilder informationString = new StringBuilder();
+                Scanner scanner = new Scanner(url.openStream());
+
+                while (scanner.hasNext()) {
+                    informationString.append(scanner.nextLine());
+                }
+                scanner.close();
+                System.out.println(informationString);
+
+                Type movieType = new TypeToken<ArrayList<MovieAPI>>() {}.getType();
+                movies = gson.fromJson(String.valueOf(informationString), movieType);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return movies;
     }
 
-    public List<MovieAPI> filterByGenre(List<MovieAPI> movies, Genre genre){
+    public List<MovieAPI> filterByGenre(List<MovieAPI> movies, Genre genre) throws IOException {
+        Gson gson = new Gson();
         if(genre == null) return movies;
 
         if(movies == null) {
             throw new IllegalArgumentException("movies must not be null");
         }
 
-        return movies.stream()
-                .filter(Objects::nonNull)
-                .filter(movie -> movie.getGenres().contains(genre))
-                .toList();
+        try {
+        URL url = new URL(baseURL + "?genre=" + genre);
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestMethod("GET");
+        connection.connect();
+
+        //check if connected
+        int responseCode = connection.getResponseCode();
+
+        // 200 = OK
+        if (responseCode != 200) {
+            throw new RuntimeException("HttpResponseCode: " + responseCode);
+        } else {
+            StringBuilder informationString = new StringBuilder();
+            Scanner scanner = new Scanner(url.openStream());
+
+            while (scanner.hasNext()) {
+                informationString.append(scanner.nextLine());
+            }
+            scanner.close();
+            System.out.println(informationString);
+
+            Type movieType = new TypeToken<ArrayList<MovieAPI>>() {}.getType();
+            movies = gson.fromJson(String.valueOf(informationString), movieType);
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
+                return movies;
     }
 
-    public void applyAllFilters(String searchQuery, Object genre) {
+    public void applyAllFilters(String searchQuery, Object genre) throws IOException {
         List<MovieAPI> filteredMovies = allMovies;
 
         if (!searchQuery.isEmpty()) {
@@ -170,8 +228,8 @@ public class HomeController implements Initializable {
         observableMovies.addAll(filteredMovies);
     }
 
-    public void searchBtnClicked(ActionEvent actionEvent) {
-        String searchQuery = searchField.getText().trim().toLowerCase();
+    public void searchBtnClicked(ActionEvent actionEvent) throws IOException {
+        String searchQuery = searchField.getText().trim().toLowerCase().replace(" ", "%20");
         Object genre = genreComboBox.getSelectionModel().getSelectedItem();
 
         applyAllFilters(searchQuery, genre);
